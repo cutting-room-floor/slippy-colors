@@ -1,0 +1,12 @@
+{
+  "name": "slippy-colors",
+  "version": "0.0.1",
+  "description": "A D3 color picker component.",
+  "main": "colorpicker.js",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^5.9.1",
+    "d3": "^3.4.11",
+    "fischer-color": "0.0.0"
+  }
+}
