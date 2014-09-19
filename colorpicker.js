@@ -181,3 +181,5 @@ function ColorPicker() {
     return d3.rebind(cp, events, 'on', 'off');
 
 }
+
+module.exports = ColorPicker;
