@@ -3,15 +3,15 @@ var d3 = require('d3');
 
 function ColorPicker() {
     var w = 628,
-        h = 100,
-        canvW = 600,
-        canvH = 400;
+    h = 100,
+    canvW = 600,
+    canvH = 400;
 
     var events = d3.dispatch('mousedown', 'mouseover', 'mouseup');
 
     var ext = {min: 0, max: w, xs: [0]}
     var pos = [0,0],
-        zm = 1;
+    zm = 1;
 
     var canv = document.createElement('canvas');
     canv.width = w;
@@ -28,7 +28,7 @@ function ColorPicker() {
         var thisC = [];
         c.forEach(function(i){ thisC.push(Math.round(i)) });
         if (!imageMap[thisC]) imageMap[thisC] = [j];
-            else imageMap[thisC].push(j);
+        else imageMap[thisC].push(j);
     }
 
     colors.putImageData(image, 0, 0);
@@ -48,17 +48,17 @@ function ColorPicker() {
     function cp(selection) {
 
         var canvasBox = selection.append('canvas')
-            .attr('width', w)
-            .attr('height', h)
-            .attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
+        .attr('width', w)
+        .attr('height', h)
+        .attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
 
         var dzoom = d3.behavior.zoom()
-            .scaleExtent([1, 8])
-            .on('zoom', zoom)
+        .scaleExtent([1, 8])
+        .on('zoom', zoom)
 
         var canvas = canvasBox
-            .call(dzoom)
-            .node().getContext("2d");
+        .call(dzoom)
+        .node().getContext("2d");
 
         cp.draw(canvas);
 
@@ -76,26 +76,26 @@ function ColorPicker() {
             var s = sc || d3.event.scale;
             t[1] = Math.min(Math.max(t[1], -h*(s-1)), 0);
             canvas.translate(t[0],t[1]);
-              // TODO ugh i can't get dzoom to persist programmatic zoom, so click -> move will reset to last move z
+            // TODO ugh i can't get dzoom to persist programmatic zoom, so click -> move will reset to last move z
             canvas.scale(s,s);
             cp.draw(canvas);
+            pos = t; zm = s;
             canvas.restore();
-            pos = t, zm = s;
         }
 
         function getPos() {
             var rect = canvasBox[0][0].getBoundingClientRect();
-            var mp = {
-                x: ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
-                y: ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
-            };
-            while (mp.x < 0) mp.x += w;
-            while (mp.x > 628) mp.x -= w;
+            var mp = [
+            ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
+            ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
+            ];
             return mp;
         }
 
         function getColor(pos) {
-            var rgba = colors.getImageData(pos.x, pos.y, 1, 1).data;
+            while (pos[0] < 0) pos[0] += w;
+            while (pos[0] > 628) pos[0] -= w;
+            var rgba = colors.getImageData(pos[0], pos[1], 1, 1).data;
             if (rgba.length > 4) {
                 var r = [], g = [], b = [], a = [];
                 for (var i=0; i<rgba.length; i+=4) {
@@ -114,19 +114,16 @@ function ColorPicker() {
             return rgbToHex(rgba);
         }
 
+
         function goTo(loc, scale) {
-            // TODO isn't updating tl, something about the edge of the box (works for say blue but not red)
-            // TODO also breaks for when scrolled past the first canvas
-              var loc = loc || getPos();
-                        // TODO loc isn't used yet, but will break bc not normalized by getPos -- refactor all to use obj or arr
-              var scale = scale || zm;
-              var view = {x: w / scale, y: h / scale};
-              var tl = {x: view.x / 2 - loc.x, y: view.y / 2 - loc.y };
+            var loc = loc || getPos();
+            var scale = scale || zm;
+            var tl = [ w/2 - loc[0]*scale, h/2 - loc[1]*scale ];
 
             d3.transition().duration(600).tween('zoom', function() {
-                var ix = d3.interpolate(pos[0], tl.x),
-                    iy = d3.interpolate(pos[1], tl.y),
-                    is = d3.interpolate(zm, scale);
+                var ix = d3.interpolate(pos[0], tl[0]),
+                iy = d3.interpolate(pos[1], tl[1]),
+                is = d3.interpolate(zm, scale);
                 return function(t) {
                     zoom([ix(t), iy(t)], is(t));
                 }
@@ -135,19 +132,19 @@ function ColorPicker() {
         }
 
 
-             var clicking = false, dragging = false;
-          selection.on('mousedown', function() {
-                clicking = true;
+
+        var clicking = false, dragging = false;
+        selection.on('mousedown', function() {
+            clicking = true;
         });
-          selection.on('mousemove', function() {
-                if (clicking) dragging = true;
+        selection.on('mousemove', function() {
+            if (clicking) dragging = true;
         });
-          selection.on('mouseup', function(d) {
+        selection.on('mouseup', function(d) {
             if (!dragging) {
-                  events.mouseup(getColor(getPos()), goTo());
+                events.mouseup(getColor(getPos()), goTo());
             }
             // TODO not on doubleclick
-            // TODO sometimes pan -> click doesn't trigger, have to click again
             clicking = false, dragging = false;
         });
 
@@ -172,17 +169,27 @@ function ColorPicker() {
         return cp;
     }
 
-    function hexToRgb (hexa) {
-                // TODO if needed
+    function hextoRGB(hex){
+        var shr = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shr, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+
+        var res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return res ? {
+            r: parseInt(res[1], 16),
+            g: parseInt(res[2], 16),
+            b: parseInt(res[3], 16)
+        } : null;
     }
 
     function rgbToHex (rgb) {
-        var hexa = '#';
+        var hex = '#';
         [rgb[0],rgb[1],rgb[2]].forEach(function(c) {
             var h = c.toString(16);
-            hexa += h.length == 1 ? '0' + h : h;
+            hex += h.length == 1 ? '0' + h : h;
         });
-        return hexa;
+        return hex;
     }
 
     return d3.rebind(cp, events, 'on', 'off');
