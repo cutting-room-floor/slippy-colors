@@ -129,7 +129,7 @@ function ColorPicker() {
                 }
             });
 
-          	dzoom.translate(tl);
+            dzoom.translate(tl);
         }
 
 
