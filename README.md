@@ -1,5 +1,8 @@
 A D3 color picker component. It's a color picker...*and* a slippy map.
 
+Based on Eric Fischer's perceptually accurate color spectrum, using Tom MacWright's [JavaScript implementation](https://www.github.com/mapbox/fischer-color).
+
+
 ## usage
 
 ``` js
