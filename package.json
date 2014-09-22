@@ -13,6 +13,10 @@
     "rgb",
     "fischer"
   ],
+  "repository": {
+  "type": "git",
+  "url": "git://github.com/mapbox/slippy-colors.git"
+  },
   "license": "ISC",
   "dependencies": {
     "d3": "^3.4.11",
