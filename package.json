@@ -5,7 +5,6 @@
   "main": "colorpicker.js",
   "license": "ISC",
   "dependencies": {
-    "browserify": "^5.9.1",
     "d3": "^3.4.11",
     "fischer-color": "0.0.0"
   }
