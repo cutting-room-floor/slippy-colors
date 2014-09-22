@@ -76,7 +76,6 @@ function ColorPicker() {
             var s = sc || d3.event.scale;
             t[1] = Math.min(Math.max(t[1], -h*(s-1)), 0);
             canvas.translate(t[0],t[1]);
-            // TODO ugh i can't get dzoom to persist programmatic zoom, so click -> move will reset to last move z
             canvas.scale(s,s);
             cp.draw(canvas);
             pos = t; zm = s;
