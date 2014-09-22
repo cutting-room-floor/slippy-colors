@@ -115,12 +115,17 @@ function ColorPicker() {
         }
 
         function goTo(loc, scale) {
+            // TODO isn't updating tl, something about the edge of the box (works for say blue but not red)
+            // TODO also breaks for when scrolled past the first canvas
               var loc = loc || getPos();
                         // TODO loc isn't used yet, but will break bc not normalized by getPos -- refactor all to use obj or arr
-              var scale = scale || zm + 1;
-            d3.transition().duration(1000).tween('zoom', function() {
-                var ix = d3.interpolate(pos[0], -loc.x * (scale - 1)),
-                    iy = d3.interpolate(pos[1], -loc.y * (scale - 1)),
+              var scale = scale || zm;
+              var view = {x: w / scale, y: h / scale};
+              var tl = {x: view.x / 2 - loc.x, y: view.y / 2 - loc.y };
+
+            d3.transition().duration(600).tween('zoom', function() {
+                var ix = d3.interpolate(pos[0], tl.x),
+                    iy = d3.interpolate(pos[1], tl.y),
                     is = d3.interpolate(zm, scale);
                 return function(t) {
                     zoom([ix(t), iy(t)], is(t));
@@ -141,6 +146,8 @@ function ColorPicker() {
             if (!dragging) {
                   events.mouseup(getColor(getPos()), goTo());
             }
+            // TODO not on doubleclick
+            // TODO sometimes pan -> click doesn't trigger, have to click again
             clicking = false, dragging = false;
         });
 
