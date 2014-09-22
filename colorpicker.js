@@ -3,15 +3,15 @@ var d3 = require('d3');
 
 function ColorPicker() {
     var w = 628,
-    		h = 100,
-    		canvW = 600,
-    		canvH = 400;
+    	h = 100,
+    	canvW = 600,
+    	canvH = 400;
 
     var events = d3.dispatch('mousedown', 'mouseover', 'mouseup');
 
     var ext = {min: 0, max: w, xs: [0]}
     var pos = [0,0],
-    		zm = 1;
+    	zm = 1;
 
     var canv = document.createElement('canvas');
     canv.width = w;
@@ -48,17 +48,17 @@ function ColorPicker() {
     function cp(selection) {
 
         var canvasBox = selection.append('canvas')
-        		.attr('width', w)
-        		.attr('height', h)
-        		.attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
+        	.attr('width', w)
+        	.attr('height', h)
+        	.attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
 
         var dzoom = d3.behavior.zoom()
-        		.scaleExtent([1, 8])
-        		.on('zoom', zoom)
+        	.scaleExtent([1, 8])
+        	.on('zoom', zoom)
 
         var canvas = canvasBox
-        		.call(dzoom)
-        		.node().getContext("2d");
+        	.call(dzoom)
+        	.node().getContext("2d");
 
         cp.draw(canvas);
 
@@ -86,8 +86,8 @@ function ColorPicker() {
         function getPos() {
             var rect = canvasBox[0][0].getBoundingClientRect();
             var mp = [
-            		((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
-            		((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
+            	((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
+            	((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
             ];
             return mp;
         }
@@ -122,8 +122,8 @@ function ColorPicker() {
 
             d3.transition().duration(600).tween('zoom', function() {
                 var ix = d3.interpolate(pos[0], tl[0]),
-                		iy = d3.interpolate(pos[1], tl[1]),
-                		is = d3.interpolate(zm, scale);
+                	iy = d3.interpolate(pos[1], tl[1]),
+                	is = d3.interpolate(zm, scale);
                 return function(t) {
                     zoom([ix(t), iy(t)], is(t));
                 }
