@@ -3,15 +3,15 @@ var d3 = require('d3');
 
 function ColorPicker() {
     var w = 628,
-    	h = 100,
-    	canvW = 600,
-    	canvH = 400;
+      h = 100,
+      canvW = 600,
+      canvH = 400;
 
     var events = d3.dispatch('mousedown', 'mouseover', 'mouseup');
 
-    var ext = {min: 0, max: w, xs: [0]}
+    var ext = {min: 0, max: w, xs: [0]};
     var pos = [0,0],
-    	zm = 1;
+      zm = 1;
 
     var canv = document.createElement('canvas');
     canv.width = w;
@@ -26,7 +26,7 @@ function ColorPicker() {
         image.data[++j] = c[2];
         image.data[++j] = 255;
         var thisC = [];
-        c.forEach(function(i){ thisC.push(Math.round(i)) });
+        c.forEach(function(i){ thisC.push(Math.round(i)); });
         if (!imageMap[thisC]) imageMap[thisC] = [j];
         else imageMap[thisC].push(j);
     }
@@ -35,7 +35,7 @@ function ColorPicker() {
 
     function findColor(rgb) {
         var l = imageMap[rgb];
-        var loc = l.reduce(function(a,b){return a+b}) / l.length;
+        var loc = l.reduce(function(a,b){return a+b;}) / l.length;
         var x, y;
         var pxW = w*4;
         y = Math.ceil(loc/pxW);
@@ -48,17 +48,17 @@ function ColorPicker() {
     function cp(selection) {
 
         var canvasBox = selection.append('canvas')
-        	.attr('width', w)
-        	.attr('height', h)
-        	.attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
+          .attr('width', w)
+          .attr('height', h)
+          .attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
 
         var dzoom = d3.behavior.zoom()
-        	.scaleExtent([1, 8])
-        	.on('zoom', zoom)
+          .scaleExtent([1, 8])
+          .on('zoom', zoom);
 
         var canvas = canvasBox
-        	.call(dzoom)
-        	.node().getContext("2d");
+          .call(dzoom)
+          .node().getContext("2d");
 
         cp.draw(canvas);
 
@@ -85,8 +85,8 @@ function ColorPicker() {
         function getPos() {
             var rect = canvasBox[0][0].getBoundingClientRect();
             var mp = [
-            	((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
-            	((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
+              ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
+              ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
             ];
             return mp;
         }
@@ -115,17 +115,17 @@ function ColorPicker() {
 
 
         function goTo(loc, scale) {
-            var loc = loc || getPos();
-            var scale = scale || zm;
+            loc = loc || getPos();
+            scale = scale || zm;
             var tl = [ w/2 - loc[0]*scale, h/2 - loc[1]*scale ];
 
             d3.transition().duration(600).tween('zoom', function() {
                 var ix = d3.interpolate(pos[0], tl[0]),
-                	iy = d3.interpolate(pos[1], tl[1]),
-                	is = d3.interpolate(zm, scale);
+                    iy = d3.interpolate(pos[1], tl[1]),
+                    is = d3.interpolate(zm, scale);
                 return function(t) {
                     zoom([ix(t), iy(t)], is(t));
-                }
+                };
             });
 
             dzoom.translate(tl);
@@ -147,29 +147,27 @@ function ColorPicker() {
             // TODO not on doubleclick
             clicking = false; dragging = false;
         });
-
-
     }
 
     cp.draw = function(c) {
         ext.xs.forEach(function(atX) {
             c.drawImage(canv, atX, 0);
-        })
-    }
+        });
+    };
 
     cp.width = function(_) {
         if (!arguments.length) return canvW;
         canvW = _;
         return cp;
-    }
+    };
 
     cp.height = function(_) {
         if (!arguments.length) return canvH;
         canvH = _;
         return cp;
-    }
+    };
 
-    function hextoRGB(hex){
+    function hextoRGB(hex) {
         var shr = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
         hex = hex.replace(shr, function(m, r, g, b) {
             return r + r + g + g + b + b;
