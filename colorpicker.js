@@ -30,11 +30,11 @@ function ColorPicker() {
         if (!imageMap[thisC]) imageMap[thisC] = [j];
         else imageMap[thisC].push(j);
     }
-
     colors.putImageData(image, 0, 0);
 
     function findColor(rgb) {
         var l = imageMap[rgb];
+      	if (!l) return null;
         var loc = l.reduce(function(a,b){return a+b;}) / l.length;
         var x, y;
         var pxW = w*4;
@@ -44,6 +44,8 @@ function ColorPicker() {
         // TODO this is just a bit off (rounding errors or something)
         // TODO this breaks for non-represented RGBs -- figure out a way to do reverse fischer-color lookups.
     }
+
+  	var center;
 
     function cp(selection) {
 
@@ -94,7 +96,7 @@ function ColorPicker() {
         function getColor(p) {
             while (p[0] < 0) p[0] += w;
             while (p[0] > 628) p[0] -= w;
-            var rgba = colors.getImageData(p[0], p[1], 1, 1).data;
+            var rgba = colors.getImageData(Math.round(p[0]), Math.round(p[1]), 1, 1).data;
             if (rgba.length > 4) {
                 var r = [], g = [], b = [], a = [];
                 for (var i=0; i<rgba.length; i+=4) {
@@ -110,11 +112,11 @@ function ColorPicker() {
                     }) / c.length));
                 });
             }
-            return rgbToHex(rgba);
+          	return rgbToHex(rgba);
         }
 
 
-        function goTo(loc, scale) {
+        var goTo = cp.goTo = function(loc, scale) {
             loc = loc || getPos();
             scale = scale || zm;
             var tl = [ w/2 - loc[0]*scale, h/2 - loc[1]*scale ];
@@ -129,9 +131,13 @@ function ColorPicker() {
             });
 
             dzoom.translate(tl);
+            dzoom.scale(scale);
         }
 
-
+        if (center) {
+        		var loc = findColor(hextoRGB(center.color));
+            if (loc) goTo(loc, center.z);
+        }
 
         var clicking = false, dragging = false;
         selection.on('mousedown', function() {
@@ -167,6 +173,11 @@ function ColorPicker() {
         return cp;
     };
 
+    cp.center = function(color, z) {
+      center = {color: color, z: z};
+      return cp;
+    }
+
     function hextoRGB(hex) {
         var shr = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
         hex = hex.replace(shr, function(m, r, g, b) {
@@ -174,11 +185,11 @@ function ColorPicker() {
         });
 
         var res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return res ? {
-            r: parseInt(res[1], 16),
-            g: parseInt(res[2], 16),
-            b: parseInt(res[3], 16)
-        } : null;
+        return res ? [
+            parseInt(res[1], 16),
+            parseInt(res[2], 16),
+            parseInt(res[3], 16)
+        ] : null;
     }
 
     function rgbToHex (rgb) {
