@@ -7,7 +7,7 @@ function ColorPicker() {
       canvW = 600,
       canvH = 400;
 
-    var events = d3.dispatch('mousedown', 'mouseover', 'mouseup');
+    var events = d3.dispatch('mousedown', 'mousemove', 'mouseup');
 
     var ext = {min: 0, max: w, xs: [0]};
     var pos = [0,0],
@@ -30,6 +30,7 @@ function ColorPicker() {
         if (!imageMap[thisC]) imageMap[thisC] = [j];
         else imageMap[thisC].push(j);
     }
+
     colors.putImageData(image, 0, 0);
 
     function findColor(rgb) {
@@ -116,7 +117,7 @@ function ColorPicker() {
         }
 
 
-        var goTo = cp.goTo = function(loc, scale) {
+        function goTo(loc, scale) {
             loc = loc || getPos();
             scale = scale || zm;
             var tl = [ w/2 - loc[0]*scale, h/2 - loc[1]*scale ];
