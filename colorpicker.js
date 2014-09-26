@@ -88,8 +88,8 @@ function ColorPicker() {
         function getPos() {
             var rect = canvasBox[0][0].getBoundingClientRect();
             var mp = [
-              ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
-              ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
+                ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
+                ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
             ];
             return mp;
         }
@@ -136,7 +136,11 @@ function ColorPicker() {
         }
 
         if (center) {
-        		var loc = findColor(hextoRGB(center.color));
+            var color;
+            if (typeof center.color === 'string') color = hextoRGB(center.color);
+                else if (Array.isArray(center.color)) color = center.color;
+                else return;
+        	var loc = findColor(color);
             if (loc) goTo(loc, center.z);
         }
 
@@ -175,8 +179,8 @@ function ColorPicker() {
     };
 
     cp.center = function(color, z) {
-      if (color && z) center = {color: color, z: z};
-      return cp;
+        if (color && z) center = {color: color, z: z};
+        return cp;
     }
 
     function hextoRGB(hex) {
