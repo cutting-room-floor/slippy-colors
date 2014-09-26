@@ -175,7 +175,7 @@ function ColorPicker() {
     };
 
     cp.center = function(color, z) {
-      center = {color: color, z: z};
+      if (color && z) center = {color: color, z: z};
       return cp;
     }
 
