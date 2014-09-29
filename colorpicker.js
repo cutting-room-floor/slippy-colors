@@ -7,7 +7,7 @@ function ColorPicker() {
       canvW = 600,
       canvH = 400;
 
-    var events = d3.dispatch('mousedown', 'mouseover', 'mouseup');
+    var events = d3.dispatch('mousedown', 'mousemove', 'mouseup');
 
     var ext = {min: 0, max: w, xs: [0]};
     var pos = [0,0],
@@ -35,6 +35,7 @@ function ColorPicker() {
 
     function findColor(rgb) {
         var l = imageMap[rgb];
+      	if (!l) return null;
         var loc = l.reduce(function(a,b){return a+b;}) / l.length;
         var x, y;
         var pxW = w*4;
@@ -44,6 +45,8 @@ function ColorPicker() {
         // TODO this is just a bit off (rounding errors or something)
         // TODO this breaks for non-represented RGBs -- figure out a way to do reverse fischer-color lookups.
     }
+
+  	var center;
 
     function cp(selection) {
 
@@ -85,8 +88,8 @@ function ColorPicker() {
         function getPos() {
             var rect = canvasBox[0][0].getBoundingClientRect();
             var mp = [
-              ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
-              ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
+                ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
+                ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
             ];
             return mp;
         }
@@ -94,7 +97,7 @@ function ColorPicker() {
         function getColor(p) {
             while (p[0] < 0) p[0] += w;
             while (p[0] > 628) p[0] -= w;
-            var rgba = colors.getImageData(p[0], p[1], 1, 1).data;
+            var rgba = colors.getImageData(Math.round(p[0]), Math.round(p[1]), 1, 1).data;
             if (rgba.length > 4) {
                 var r = [], g = [], b = [], a = [];
                 for (var i=0; i<rgba.length; i+=4) {
@@ -110,7 +113,7 @@ function ColorPicker() {
                     }) / c.length));
                 });
             }
-            return rgbToHex(rgba);
+          	return rgbToHex(rgba);
         }
 
 
@@ -129,9 +132,17 @@ function ColorPicker() {
             });
 
             dzoom.translate(tl);
+            dzoom.scale(scale);
         }
 
-
+        if (center) {
+            var color;
+            if (typeof center.color === 'string') color = hextoRGB(center.color);
+                else if (Array.isArray(center.color)) color = center.color;
+                else return;
+        	var loc = findColor(color);
+            if (loc) goTo(loc, center.z);
+        }
 
         var clicking = false, dragging = false;
         selection.on('mousedown', function() {
@@ -167,6 +178,11 @@ function ColorPicker() {
         return cp;
     };
 
+    cp.center = function(color, z) {
+        if (color && z) center = {color: color, z: z};
+        return cp;
+    }
+
     function hextoRGB(hex) {
         var shr = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
         hex = hex.replace(shr, function(m, r, g, b) {
@@ -174,11 +190,11 @@ function ColorPicker() {
         });
 
         var res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return res ? {
-            r: parseInt(res[1], 16),
-            g: parseInt(res[2], 16),
-            b: parseInt(res[3], 16)
-        } : null;
+        return res ? [
+            parseInt(res[1], 16),
+            parseInt(res[2], 16),
+            parseInt(res[3], 16)
+        ] : null;
     }
 
     function rgbToHex (rgb) {
