@@ -1,17 +1,22 @@
-var interpolate = require('fischer-color').interpolate;
-var d3 = require('d3');
+"use strict";
+
+/*global module, require*/
+
+var interpolate = require('fischer-color').interpolate,
+    d3 = require('d3'),
+    mousePos = require("./mouse-event-pos.js");
 
 function ColorPicker() {
     var w = 628,
-      h = 100,
-      canvW = 600,
-      canvH = 400;
+	h = 100,
+	canvW = 600,
+	canvH = 400;
 
     var events = d3.dispatch('mousedown', 'mousemove', 'mouseup');
 
     var ext = {min: 0, max: w, xs: [0]};
     var pos = [0,0],
-      zm = 1;
+	zm = 1;
 
     var canv = document.createElement('canvas');
     canv.width = w;
@@ -46,22 +51,22 @@ function ColorPicker() {
         // TODO this breaks for non-represented RGBs -- figure out a way to do reverse fischer-color lookups.
     }
 
-  	var center;
+    var center;
 
     function cp(selection) {
 
         var canvasBox = selection.append('canvas')
-          .attr('width', w)
-          .attr('height', h)
-          .attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
+		.attr('width', w)
+		.attr('height', h)
+		.attr('style', 'width:' + canvW + 'px;height:' + canvH + 'px;');
 
         var dzoom = d3.behavior.zoom()
-          .scaleExtent([1, 8])
-          .on('zoom', zoom);
+		.scaleExtent([1, 8])
+		.on('zoom', zoom);
 
         var canvas = canvasBox
-          .call(dzoom)
-          .node().getContext("2d");
+		.call(dzoom)
+		.node().getContext("2d");
 
         cp.draw(canvas);
 
@@ -86,12 +91,18 @@ function ColorPicker() {
         }
 
         function getPos() {
-            var rect = canvasBox[0][0].getBoundingClientRect();
-            var mp = [
-                ((d3.event.x - rect.left)  * (w / canvW) - pos[0]) / zm,
-                ((d3.event.y - rect.top)  * (h / canvH) - pos[1]) / zm
-            ];
-            return mp;
+            var rect = canvasBox[0][0].getBoundingClientRect(),
+		newPos = mousePos(),
+		x = ((newPos.x - rect.left)  * (w / canvW) - pos[0]) / zm,
+		y = ((newPos.y - rect.top)  * (h / canvH) - pos[1]) / zm;
+		
+            return [
+		/*
+		 We shouldn't get NaN's here, but if we do then we're stuck forever, so we'll guard against them.
+		 */
+		isNaN(x) ? 0 : x,
+		isNaN(y) ? 0 : y
+	    ];
         }
 
         function getColor(p) {
@@ -113,7 +124,7 @@ function ColorPicker() {
                     }) / c.length));
                 });
             }
-          	return rgbToHex(rgba);
+            return rgbToHex(rgba);
         }
 
 
@@ -138,9 +149,9 @@ function ColorPicker() {
         if (center) {
             var color;
             if (typeof center.color === 'string') color = hextoRGB(center.color);
-                else if (Array.isArray(center.color)) color = center.color;
-                else return;
-        	var loc = findColor(color);
+            else if (Array.isArray(center.color)) color = center.color;
+            else return;
+            var loc = findColor(color);
             if (loc) goTo(loc, center.z);
         }
 
@@ -181,7 +192,7 @@ function ColorPicker() {
     cp.center = function(color, z) {
         if (color && z) center = {color: color, z: z};
         return cp;
-    }
+    };
 
     function hextoRGB(hex) {
         var shr = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
@@ -208,6 +219,7 @@ function ColorPicker() {
 
     return d3.rebind(cp, events, 'on', 'off');
 
-}
+};
 
 module.exports = ColorPicker;
+
