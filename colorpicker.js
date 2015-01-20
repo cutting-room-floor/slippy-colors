@@ -53,6 +53,10 @@ function ColorPicker() {
 
     var center;
 
+    function isArray(val) {
+	return Object.prototype.toString.call(val ) === '[object Array]';
+    };
+    
     function cp(selection) {
 
         var canvasBox = selection.append('canvas')
@@ -73,7 +77,7 @@ function ColorPicker() {
         function zoom(tr, sc) {
             canvas.save();
             canvas.clearRect(0, 0, w, h);
-            var t = tr || d3.event.translate;
+            var t = (tr && isArray(tr) && tr.length === 2) ? tr : d3.event.translate;
             if (-t[0] + w > ext.max) {
                 ext.xs.push(ext.max);
                 ext.max += w;
@@ -225,7 +229,7 @@ function ColorPicker() {
 
     return d3.rebind(cp, events, 'on', 'off');
 
-};
+}
 
 module.exports = ColorPicker;
 
