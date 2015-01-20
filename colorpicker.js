@@ -134,8 +134,14 @@ function ColorPicker() {
             var tl = [ w/2 - loc[0]*scale, h/2 - loc[1]*scale ];
 
             d3.transition().duration(600).tween('zoom', function() {
-                var ix = d3.interpolate(pos[0], tl[0]),
-                    iy = d3.interpolate(pos[1], tl[1]),
+                var ix = d3.interpolate(
+		    isNaN(pos[0]) ? 0 : pos[0],
+		    tl[0]
+		),
+                    iy = d3.interpolate(
+			isNaN(pos[1]) ? 0 : pos[1],
+			tl[1]
+		    ),
                     is = d3.interpolate(zm, scale);
                 return function(t) {
                     zoom([ix(t), iy(t)], is(t));
