@@ -1,5 +1,5 @@
 {
-  "name": "slippy-colors",
+  "name": "@mapbox/slippy-colors",
   "version": "0.0.2",
   "description": "A D3 color picker component.",
   "main": "colorpicker.js",
